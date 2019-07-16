@@ -3,6 +3,6 @@ node {
             cleanWs()
         }
         stage('launch-docker-container') {
-            sh 'sudo docker run -d 8080:8080 --name: calculator joaodartora/calculator .'
+            sh 'docker run -d -p 8031:8080 --name calculator-microservice joaodartora/calculator .'
         }
 }
