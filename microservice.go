@@ -6,7 +6,8 @@ import (
 	"math"
 	"net/http"
 	"strconv"
-	"strings"
+
+	"github.com/gorilla/mux"
 )
 
 type MathCalculation struct {
@@ -19,23 +20,21 @@ type MathCalculation struct {
 var mathOperationsHistory []MathCalculation = []MathCalculation{}
 
 func main() {
-	http.HandleFunc("/calc/", Calculator)
-	http.HandleFunc("/calc/history", GetOperationsHistory)
+	mux := mux.NewRouter()
+
+	mux.HandleFunc("/calc/{operation}/{x}/{y}", Calculator)
+	mux.HandleFunc("/calc/history", GetOperationsHistory)
+
+	http.Handle("/", mux)
 	http.ListenAndServe(":8080", nil)
 }
 
 func Calculator(response http.ResponseWriter, request *http.Request) {
-	urlPart := strings.Split(request.URL.Path, "/")
 
-	if len(urlPart) < 5 {
-		http.Error(response, "error: some arguments are not supplied", http.StatusBadRequest)
-	}
-	if len(urlPart) > 6 {
-		http.Error(response, "error: too much arguments", http.StatusBadRequest)
-	}
+	urlPart := mux.Vars(request)
 
-	x, error1 := strconv.ParseFloat(urlPart[3], 64)
-	y, error2 := strconv.ParseFloat(urlPart[4], 64)
+	x, error1 := strconv.ParseFloat(urlPart["x"], 64)
+	y, error2 := strconv.ParseFloat(urlPart["y"], 64)
 
 	if error1 != nil {
 		http.Error(response, error1.Error(), http.StatusInternalServerError)
@@ -46,7 +45,7 @@ func Calculator(response http.ResponseWriter, request *http.Request) {
 		log.Fatalf("error: %v", error2)
 	}
 
-	calculation := MathCalculation{Operation: urlPart[2], FirstNumber: x, SecondNumber: y}
+	calculation := MathCalculation{Operation: urlPart["operation"], FirstNumber: x, SecondNumber: y}
 	result := Calculate(calculation)
 
 	responseHistory, errorResponse := json.Marshal(result)
@@ -58,7 +57,6 @@ func Calculator(response http.ResponseWriter, request *http.Request) {
 }
 
 func Calculate(calc MathCalculation) float64 {
-
 	switch calc.Operation {
 	case "sum":
 		calc.Result = Sum(calc.FirstNumber, calc.SecondNumber)

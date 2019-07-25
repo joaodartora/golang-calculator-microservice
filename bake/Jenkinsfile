@@ -4,10 +4,8 @@ node {
         }
         stage('preparation') {
             git url: 'https://github.com/joaodartora/golang-calculator-microservice.git'
-            sh 'mkdir microservice/'
-            sh 'mv microservice.go packerGolang.json microservice/'
         }
         stage('packer-build') {
-            sh 'packer build microservice/packerGolang.json'
+            sh 'packer build packerGolang.json'
         }
 }
