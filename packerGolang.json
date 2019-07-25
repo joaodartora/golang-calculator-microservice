@@ -15,6 +15,12 @@
 	"type": "file",
  	"source": "microservice.go",
   	"destination": "/opt/"
+    },
+    {
+        "type": "shell",
+        "inline": [
+          "go get -u github.com/gorilla/mux"
+        ]
     }
     ],
     "post-processors": [
